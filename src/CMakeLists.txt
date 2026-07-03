@@ -1,3 +1,8 @@
-include_directories(${CMAKE_SOURCE_DIR}/include)
-# 约定目标名即目录名
-router_directories()
+add_subdirectories()
+
+install(PACKAGE_INFO ${CMAKE_PROJECT_NAME} EXPORT RomanNumerals 
+    CONFIGURATIONS Release
+)
+install(PACKAGE_INFO ${CMAKE_PROJECT_NAME} EXPORT types 
+    CONFIGURATIONS Release
+)

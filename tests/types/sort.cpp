@@ -1,17 +1,14 @@
 #include "sort.hpp"
 #include <iostream>
+#include <type_traits>
 
 #ifdef _MSC_VER
-template <typename T>
-void print(T &&)
-{
+template <typename T> void print(T &&) {
   std::cout << typeid(T).name() << std::endl;
 }
 #else
 void print(std::tuple<>) { std::cout << std::endl; }
-template <typename T, typename... Ts>
-void print(std::tuple<T, Ts...> &&)
-{
+template <typename T, typename... Ts> void print(std::tuple<T, Ts...> &&) {
   std::cout << sizeof(T) << ':' << typeid(T).name() << '\t';
   print(std::tuple<Ts...>{});
 }
@@ -22,9 +19,11 @@ using type_equal = types::conjunction<std::is_same<Tuple, Tuples>...>;
 template <typename L, typename R>
 using size_less = std::integral_constant<bool, sizeof(L) < sizeof(R)>;
 namespace t_sort = types::sort;
-int main(int argc, char const *argv[])
-{
-  using A = std::tuple<double, void *, bool, unsigned short, short,
+// 独立验证每个排序结果都已按 Comparator 有序
+template <typename... Tuples>
+using all_sorted = types::conjunction<t_sort::is_sorted<Tuples, size_less>...>;
+int main(int argc, char const *argv[]) {
+  using A = std::tuple<double, bool, unsigned short, short, void *,
                        unsigned char, char, unsigned int, long, unsigned long,
                        long long, unsigned long long, long double, int, float>;
   print(A{});
@@ -52,7 +51,11 @@ int main(int argc, char const *argv[])
   static_assert(t_sort::is_sorted<merge, size_less>::value,
                 "iterative_sort failed");
   print(merge{});
-  static_assert(type_equal<count, heap, insert, bubble, group, merge>::value,
-                "iterative_sort failed");
+  // 每种算法均产生按 Comparator 有序的结果
+  static_assert(all_sorted<count, heap, insert, bubble, group, merge>::value,
+                "one or more sort algorithms produced unsorted output");
+  // 插入/冒泡/分组/归并 对相同输入产生相同的稳定排序结果
+  static_assert(type_equal<insert, bubble, group, merge>::value,
+                "stable sort algorithms produced different output");
   return 0;
 }
