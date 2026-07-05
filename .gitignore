@@ -45,19 +45,14 @@
 # Kernel Module Compile Results
 *.mod*
 *.cmd
-.tmp_versions/
 modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
 
 # my lost
-/.vscode
+.*/
 /out
-.antlr
 /venv
-/.venv
 /__pycache__
-/.vs
 /build
-/.cache
