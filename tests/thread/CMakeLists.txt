@@ -1,7 +1,0 @@
-cmake_path(GET CMAKE_CURRENT_LIST_DIR FILENAME PROJ)
-if(LINUX)
-    add_executable(${PROJ} test2.c)
-elseif(MINGW)
-    add_executable(${PROJ} test.c)
-    target_link_libraries(${PROJ} PRIVATE pthread)
-endif()
