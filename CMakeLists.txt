@@ -2,7 +2,7 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_module ${CMAKE_MODULE_PATH})
 cmake_path(GET CMAKE_CURRENT_LIST_DIR FILENAME PROJ)
 project(${PROJ})
-include(router)
+include(Router)
 include(CPack)
 enable_testing()
 find_package(Doxygen REQUIRED)

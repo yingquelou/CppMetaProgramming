@@ -135,24 +135,6 @@ struct __sequence_concat<integer_sequence<T, Is1...>,
                          integer_sequence<T, Is2...>> {
   using type = integer_sequence<T, Is1..., (Is2 + sizeof...(Is1))...>;
 };
-namespace __2 {
-template <typename T, T N> class __make_integer_sequence {
-  template <T N1, T N2> struct helper {
-    using type = typename __sequence_concat<
-        typename __make_integer_sequence<T, N1>::type,
-        typename __make_integer_sequence<T, N2>::type>::type;
-  };
-  template <> struct helper<0, 0> {
-    using type = integer_sequence<T>;
-  };
-  template <> struct helper<0, 1> {
-    using type = integer_sequence<T, 0>;
-  };
-
-public:
-  using type = typename helper<N / 2, N - N / 2>::type;
-};
-} // namespace __2
 /// \cond
 namespace __3 {
 /// 整数序列生成器实现（基于二分递归）
@@ -199,11 +181,11 @@ template <typename T, T N>
 using make_integer_sequence =
     typename __impl_integer_sequence::__make_integer_sequence<T, N>::type;
 /// `integer_sequence`的`size_t`特化版本
-template <size_t... Ints>
-using index_sequence = integer_sequence<size_t, Ints...>;
+template <std::size_t... Ints>
+using index_sequence = integer_sequence<std::size_t, Ints...>;
 /// 创建`index_sequence<0, 1, 2, ..., N-1>`的便捷别名
-template <size_t N>
-using make_index_sequence = make_integer_sequence<size_t, N>;
+template <std::size_t N>
+using make_index_sequence = make_integer_sequence<std::size_t, N>;
 /// 根据参数包长度创建对应的`index_sequence`
 template <typename... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;

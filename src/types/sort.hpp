@@ -97,9 +97,8 @@ namespace __impl_insert {
 /// \tparam Comparator 比较器模板，提供 `<` 或 `<=` 语义
 template <typename Tuple, template <typename, typename> class Comparator>
 class sort_insert {
-  template <typename CurTuple> struct helper;
-  template <> struct helper<std::tuple<>> {
-    using type = std::tuple<>;
+  template <typename CurTuple> struct helper {
+    using type = CurTuple;
   };
   template <typename T> struct helper<std::tuple<T>> {
     using type = std::tuple<T>;
@@ -280,17 +279,20 @@ private:
     using type = std::pair<T, OtherTuple>;
   };
   // 构建排序后的元组类型
-  template <typename CurTuple> class build {
+  template <typename CurTuple,
+            bool Empty = (std::tuple_size<CurTuple>::value == 0)>
+  class build;
+  template <typename CurTuple> class build<CurTuple, true> {
+  public:
+    using type = std::tuple<>;
+  };
+  template <typename CurTuple> class build<CurTuple, false> {
     using splited = typename find_min_type<CurTuple, std::tuple<>>::type;
 
   public:
     using type = typename concat<
         typename splited::first_type,
         typename build<typename splited::second_type>::type>::type;
-  };
-  template <> class build<std::tuple<>> {
-  public:
-    using type = std::tuple<>;
   };
 
 public:
@@ -328,19 +330,21 @@ public:
 template <typename List1, typename List2,
           template <typename, typename> class Comparator>
 class list_merge {
-  template <typename L1, typename L2> struct helper;
-  template <> struct helper<std::tuple<>, std::tuple<>> {
+  template <typename L1, typename L2, typename = void> struct helper;
+  template <typename Dummy> struct helper<std::tuple<>, std::tuple<>, Dummy> {
     using type = std::tuple<>;
   };
-  template <typename... Ts> struct helper<std::tuple<Ts...>, std::tuple<>> {
+  template <typename... Ts, typename Dummy>
+  struct helper<std::tuple<Ts...>, std::tuple<>, Dummy> {
     using type = std::tuple<Ts...>;
   };
-  template <typename... Ts> struct helper<std::tuple<>, std::tuple<Ts...>> {
+  template <typename... Ts, typename Dummy>
+  struct helper<std::tuple<>, std::tuple<Ts...>, Dummy> {
     using type = std::tuple<Ts...>;
   };
   template <typename Head1, typename... Tail1, typename Head2,
-            typename... Tail2>
-  struct helper<std::tuple<Head1, Tail1...>, std::tuple<Head2, Tail2...>> {
+            typename... Tail2, typename Dummy>
+  struct helper<std::tuple<Head1, Tail1...>, std::tuple<Head2, Tail2...>, Dummy> {
     using type = typename std::conditional<
         Comparator<Head1, Head2>::value,
         typename concat<
@@ -365,14 +369,14 @@ class sort_merge {
   template <typename L, typename R>
   using cmp = Comparator<typename std::tuple_element<0, L>::type,
                          typename std::tuple_element<0, R>::type>;
-  template <typename List> struct helper;
-  template <> struct helper<std::tuple<>> {
+  template <typename List, typename = void> struct helper;
+  template <typename Dummy> struct helper<std::tuple<>, Dummy> {
     using type = std::tuple<>;
   };
-  template <typename T> struct helper<std::tuple<T>> {
+  template <typename T, typename Dummy> struct helper<std::tuple<T>, Dummy> {
     using type = std::tuple<T>;
   };
-  template <typename... Ts> struct helper<std::tuple<Ts...>> {
+  template <typename... Ts, typename Dummy> struct helper<std::tuple<Ts...>, Dummy> {
   private:
     using SplitLists = split<std::tuple<Ts...>>;
     using SortedFirst = typename helper<typename SplitLists::first>::type;
